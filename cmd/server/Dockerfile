@@ -25,13 +25,17 @@ RUN make build
 
 
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates bash
+RUN apk --no-cache add ca-certificates bash dos2unix
 RUN mkdir -p /var/log/app
+RUN touch /var/log/app/entry.log
+RUN touch /var/log/app/server.log
 WORKDIR /app/
 COPY --from=build /usr/local/bin/migrate /usr/local/bin
 COPY --from=build /app/migrations ./migrations/
 COPY --from=build /app/server .
 COPY --from=build /app/cmd/server/entrypoint.sh .
 COPY --from=build /app/config/*.yml ./config/
-RUN ls -la
-ENTRYPOINT ["./entrypoint.sh"]
+
+RUN dos2unix entrypoint.sh
+
+CMD ["bash","./entrypoint.sh"]
